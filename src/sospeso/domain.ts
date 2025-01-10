@@ -43,6 +43,11 @@ export type Sospeso = {
   consuming: SospesoConsuming | undefined;
 };
 
+export type SospesoBundle = Sospeso & {
+  amount: number;
+  item: string;
+};
+
 export function isApproved(sospeso: Sospeso) {
   return sospeso.applicationList.some(
     (application) => application.status === "approved",
@@ -73,6 +78,11 @@ export type SospesoIssuingCommand = {
   paidAmount: number;
 };
 
+export type SospesoBundleIssuingCommand = SospesoIssuingCommand & {
+  amount: number;
+  item: string;
+};
+
 /**
  * 소스페소를 발행합니다
  * @param command
@@ -91,6 +101,31 @@ export function issueSospeso(command: SospesoIssuingCommand): Sospeso {
     },
     applicationList: [],
     consuming: undefined,
+  };
+}
+
+/**
+ * 소스페소 번들을 발행합니다.
+ * @param command
+ * @return 발생된 소스페소 번들
+ */
+export function issueSospesoBundle(
+  command: SospesoBundleIssuingCommand,
+): SospesoBundle {
+  return {
+    id: command.sospesoId,
+    from: command.from,
+    to: command.to,
+    issuing: {
+      id: command.sospesoId,
+      issuedAt: command.issuedAt,
+      issuerId: command.issuerId,
+      paidAmount: command.paidAmount * command.amount,
+    },
+    applicationList: [],
+    consuming: undefined,
+    amount: command.amount,
+    item: command.item,
   };
 }
 
